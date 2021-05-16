@@ -1,0 +1,15 @@
+.area-box {
+    margin: 10px 0;
+}
+
+input {
+    height: 20px;
+    margin-left: 5px;
+    width: 200px;
+}
+
+.valid {
+    color: #d44950;
+    text-align: left;
+    margin-left: 90px;
+}
