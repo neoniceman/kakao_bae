@@ -15,9 +15,12 @@
   <div class="valid" v-show="validShow">{{ validMessage }}</div>
 </template>
 
+<style scoped>
+@import "./InputArea.css";
+</style>
+
 <script lang="ts">
 import { defineComponent, reactive, computed } from "vue";
-import "./InputArea.css";
 
 export default defineComponent({
   name: "input-area",
