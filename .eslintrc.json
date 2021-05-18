@@ -3,11 +3,6 @@
     "env": {
         "browser": true
     },
-    "plugins": [
-        "html",
-        "standard",
-        "vue"
-      ],   
     "rules": {
         "indent": ["warn", "tab", {"SwitchCase": 1}],
         "no-undef": "error",
