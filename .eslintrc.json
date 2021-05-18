@@ -22,5 +22,8 @@
         "ecmaVersion": 2015,
         "sourceType": "module"
     },
+    "globals": {
+        "process": true
+    },    
     "extends": ["plugin:@typescript-eslint/recommended"]
 }
