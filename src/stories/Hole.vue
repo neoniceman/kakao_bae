@@ -37,7 +37,7 @@ export default defineComponent({
       state,
       onMoleClick,
       classes: computed(() => ({
-        'up': props.isUp,
+        up: props.isUp,
       })),
     };
   },
