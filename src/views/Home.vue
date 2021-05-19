@@ -51,9 +51,9 @@
 <script lang="ts">
 import { defineComponent, reactive, computed, onMounted } from "vue";
 import { useStore } from "vuex";
+import router from "../router";
 import InputArea from "../stories/InputArea.vue";
 import MyButton from "../stories/Button.vue";
-import router from "../router";
 
 export default defineComponent({
   name: "Home",
@@ -154,8 +154,7 @@ export default defineComponent({
           // 네비게이션 전달 확인용
           store.commit("update", params);
           router.push({
-            name: "Stage",
-            params: params,
+            name: "Stage"
           });
         }
       },

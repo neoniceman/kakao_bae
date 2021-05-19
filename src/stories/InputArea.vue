@@ -62,7 +62,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["callParents"],
+  emits: ["call-parents"],
   setup(props, { emit }) {
     props = reactive(props);
     const state = reactive({
@@ -90,7 +90,7 @@ export default defineComponent({
         }
 
         state.validShow = false;
-        emit("callParents", {
+        emit("call-parents", {
           val: e.target.value,
           name: e.target.name,
           validShow: state.validShow,

@@ -1,10 +1,13 @@
 {
-    "parser": "@typescript-eslint/parser",
+    "parser": "vue-eslint-parser",
+    "root": true,    
     "env": {
-        "browser": true
+        "browser": true,
+        "node": true        
     },
+    "plugins": ["@vue"],
     "rules": {
-        "indent": ["warn", "tab", {"SwitchCase": 1}],
+        "indent": ["error", 2],
         "no-undef": "error",
         "no-unreachable": "warn",
         "no-unused-vars": "warn",
@@ -25,5 +28,11 @@
     "globals": {
         "process": true
     },    
-    "extends": ["plugin:@typescript-eslint/recommended"]
+    "extends": [
+        "plugin:vue/vue3-essential",
+        "eslint:recommended",
+        "@vue/typescript/recommended",
+        "@vue/prettier",
+        "@vue/prettier/@typescript-eslint"
+      ]
 }
