@@ -76,13 +76,12 @@ export default defineComponent({
     const levelArr: Array<Level> = [];
     let selectLevel: Level;
 
-    for (var i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
       const level1 = {} as Level;
       level1.timeWaitMin = 1500 - i * 500;
       level1.timeWaitMax = 2500 - i * 500;
       levelArr.push(level1);
     }
-
 
     state.colNumber = store.state.colNumber;
     state.rowNumber = store.state.rowNumber;
@@ -91,13 +90,25 @@ export default defineComponent({
 
     selectLevel = levelArr[state.level];
 
-    for (i = 0; i < state.colNumber * state.rowNumber; i++) {
+    for (let i = 0; i < state.colNumber * state.rowNumber; i++) {
       const mole = {} as Mole;
       mole.id = i;
       mole.isUp = false;
       mole.ready = false;
       state.moleArray.push(mole);
     }
+
+    // 10초마다 속도를 빠르게 처리
+    const speedUp = () => {
+      if (state.pause == false) {
+        const timerSpeed: ReturnType<typeof setTimeout> = setTimeout(() => {
+          selectLevel.timeWaitMin = selectLevel.timeWaitMin - 50;
+          selectLevel.timeWaitMax = selectLevel.timeWaitMax - 50;
+        }, 10000);
+      }
+    };
+
+    speedUp();
 
     const update = () => {
       if (state.currentSecond == state.maxSecond) {
@@ -124,36 +135,47 @@ export default defineComponent({
           });
 
           let idx = -1;
-          let selectedItem: Mole;
+          let selectedMole: Mole = {} as Mole;
           if (target.length > 0) {
             idx = Math.floor(Math.random() * target.length);
 
-            selectedItem = target[idx];
-            selectedItem.ready = true;
+            selectedMole = target[idx];
+            selectedMole.ready = true;
           }
 
-          const timerShow: ReturnType<typeof setTimeout> = setTimeout(() => {
-            if (idx > -1) {
-              selectedItem.isUp = true;
+          if (idx > -1) {
+            let showCallback = () => {
+              selectedMole.isUp = true;
+
+              let hideCallback = () => {
+                if (selectedMole.isUp) {
+                  selectedMole.isUp = false;
+                  selectedMole.ready = false;
+                }
+              };
 
               const timerHide: ReturnType<typeof setTimeout> = setTimeout(
-                () => {
-                  if (selectedItem.isUp) {
-                    selectedItem.isUp = false;
-                    selectedItem.ready = false;
-                  }
-                },
+                hideCallback,
                 timeWait
               );
 
               let t2 = {} as Timer;
-              t2.StartTime = new Date();
+              t2.startDate = new Date();
               t2.timerId = timerHide;
-            }
-          }, time);
-          let t1 = {} as Timer;
-          t1.StartTime = new Date();
-          t1.timerId = timerShow;
+              t2.callBack = hideCallback;
+              selectedMole.hideTimer = t2;
+            };
+            const timerShow: ReturnType<typeof setTimeout> = setTimeout(
+              showCallback,
+              time
+            );
+
+            let t1 = {} as Timer;
+            t1.startDate = new Date();
+            t1.timerId = timerShow;
+            t1.callBack = showCallback;
+            selectedMole.showTimer = t1;
+          }
         }
 
         const timerUpdate: ReturnType<typeof setTimeout> = setTimeout(() => {
@@ -168,7 +190,7 @@ export default defineComponent({
     const timeUpdate = () => {
       if (state.currentSecond == state.maxSecond) {
         state.pause = true;
-        console.log("시간 달성");
+        // console.log("시간 달성");
 
         router.push({
           name: "Finish",
@@ -181,7 +203,7 @@ export default defineComponent({
           return;
         }
 
-        console.log("시간업데이트");
+        // console.log("시간업데이트");
         state.currentSecond++;
         timeUpdate();
       }, 1000);
@@ -210,6 +232,52 @@ export default defineComponent({
         timeUpdate();
         update();
       }
+
+      const upTarget = state.moleArray.filter((item: Mole) => {
+        if (item.ready == true) {
+          return true;
+        }
+      });
+
+      if (state.pause == true) {
+        for (let i = 0; i < upTarget.length; i++) {
+          let item = upTarget[i];
+
+          if (item.showTimer.timerId) {
+            clearTimeout(item.showTimer.timerId);
+          }
+
+          if (item.hideTimer.timerId) {
+            clearTimeout(item.hideTimer.timerId);
+          }
+          item.showTimer.pauseDate = new Date();
+          item.hideTimer.pauseDate = new Date();
+        }
+      } else {
+        for (let i = 0; i < upTarget.length; i++) {
+          let item = upTarget[i];
+
+          // 아직 올라가지 않은 애들만 포함시킨다.
+          if (item.isUp == false && item.showTimer.timerId) {
+            let delay = +item.showTimer.pauseDate - +item.showTimer.startDate;
+
+            const timerShow: ReturnType<typeof setTimeout> = setTimeout(
+              item.showTimer.callBack,
+              delay
+            );
+          }
+
+          // 아직 내려가지 않은 애들만 포함시긴다.
+          if (item.isUp == true && item.hideTimer.timerId) {
+            let delay = +item.hideTimer.pauseDate - +item.hideTimer.startDate;
+
+            const timerHide: ReturnType<typeof setTimeout> = setTimeout(
+              item.hideTimer.callBack,
+              delay
+            );
+          }
+        }
+      }
     };
 
     // 하던 동작을 멈추고 홈으로
@@ -232,10 +300,6 @@ export default defineComponent({
       onClickPause,
       onClickStop,
       onMoleClick,
-      getCheckUp: computed((index: number) => {
-        // 이거 안되네;
-        return state.moleArray[index].isUp;
-      }),
     };
   },
 });
@@ -244,6 +308,8 @@ export interface Mole {
   id: number; //  고유 인덱스값
   isUp: boolean; // 튀어나왔는지 여부
   ready: boolean; // 튀어 나올준비가 되었는지 여부
+  showTimer: Timer;
+  hideTimer: Timer;
 }
 
 export interface Level {
@@ -251,8 +317,11 @@ export interface Level {
   timeWaitMax: number;
 }
 
+// TODO : ts 에서 타이머 커스터 모듈로 작성필요
 export interface Timer {
   timerId: number;
-  StartTime: Date;
+  startDate: Date;
+  pauseDate: Date;
+  callBack: any;
 }
 </script>
