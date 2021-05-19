@@ -72,64 +72,100 @@ export default defineComponent({
       pause: false,
     });
 
+    const timerArr: Array<Timer> = [];
+
+    const levelArr: Array<Level> = [];
+    let selectLevel: Level;
+
+    for (var i = 0; i < 3; i++) {
+      const level1 = {} as Level;
+      level1.timeWaitMin = 1500 - i * 500;
+      level1.timeWaitMax = 2500 - i * 500;
+      levelArr.push(level1);
+    }
+
+    selectLevel = levelArr[0];
+
     state.colNumber = store.state.colNumber;
     state.rowNumber = store.state.rowNumber;
     state.moleNumber = store.state.moleNumber;
 
-    for (var i = 0; i < state.colNumber * state.rowNumber; i++) {
+    for (i = 0; i < state.colNumber * state.rowNumber; i++) {
       const mole = {} as Mole;
       mole.id = i;
       mole.isUp = false;
+      mole.ready = false;
       state.moleArray.push(mole);
     }
-
-    console.log(state.moleArray);
 
     const update = () => {
       if (state.currentSecond == state.maxSecond) {
         return;
       } else {
         const time = randomInt(500, 1000);
+        const timeWait = randomInt(
+          selectLevel.timeWaitMin,
+          selectLevel.timeWaitMax
+        );
 
         // 이미 튀어 나온갯수가 최대값을 넘었는지 확인한다.
         const upTarget = state.moleArray.filter((item: Mole) => {
-          if (item.isUp == true) {
+          if (item.ready == true) {
             return true;
           }
         });
 
         if (upTarget.length < state.moleNumber) {
+          const target = state.moleArray.filter((item: Mole) => {
+            if (item.ready == false) {
+              return true;
+            }
+          });
+
+          let idx = -1;
+          let selectedItem: Mole;
+          if (target.length > 0) {
+            idx = Math.floor(Math.random() * target.length);
+
+            selectedItem = target[idx];
+            selectedItem.ready = true;
+          }
+
           const timerShow: ReturnType<typeof setTimeout> = setTimeout(() => {
-            const target = state.moleArray.filter((item: Mole) => {
-              if (item.isUp == false) {
-                return true;
-              }
-            });
+            if (idx > -1) {
 
-            if (target.length > 0) {
-              const idx = Math.floor(Math.random() * target.length);
-
-              const selectedItem = target[idx];
               selectedItem.isUp = true;
 
               const timerHide: ReturnType<typeof setTimeout> = setTimeout(
                 () => {
                   if (selectedItem.isUp) {
                     selectedItem.isUp = false;
+                    selectedItem.ready = false;
                   }
                 },
-                time
+                timeWait
               );
+
+              let t2 = {} as Timer;
+              t2.StartTime = new Date();
+              t2.timerId = timerHide;
+              timerArr.push(t2);
             }
           }, time);
+          let t1 = {} as Timer;
+          t1.StartTime = new Date();
+          t1.timerId = timerShow;
+          timerArr.push(t1);
         }
+
+        console.log(timerArr);
 
         const timerUpdate: ReturnType<typeof setTimeout> = setTimeout(() => {
           if (state.pause) {
             return;
           }
           update();
-        }, state.interval);
+        }, 500);
       }
     };
 
@@ -159,16 +195,16 @@ export default defineComponent({
       return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 
-    timeUpdate();
-    update();
-
     // 두더지 상자 전체 크기 설정
     state.width = 200 * state.colNumber + "px";
     state.height = 200 * state.rowNumber + "px";
 
     const onMoleClick = (e: Mole) => {
-      state.point++;
-      state.moleArray[e.id].isUp = false;
+      if (!state.pause) {
+        state.point++;
+        state.moleArray[e.id].isUp = false;
+        state.moleArray[e.id].ready = false;
+      }
     };
 
     // 모든 동장 그만
@@ -185,6 +221,11 @@ export default defineComponent({
       state.pause = true;
       router.push("/");
     };
+
+    onMounted(() => {
+      timeUpdate();
+      update();
+    });
 
     return {
       state,
@@ -204,7 +245,18 @@ export default defineComponent({
 });
 
 export interface Mole {
-  id: number;
-  isUp: boolean;
+  id: number; //  고유 인덱스값
+  isUp: boolean;  // 튀어나왔는지 여부
+  ready: boolean; // 튀어 나올준비가 되었는지 여부
+}
+
+export interface Level {
+  timeWaitMin: number;
+  timeWaitMax: number;
+}
+
+export interface Timer {
+  timerId: number;
+  StartTime: Date;
 }
 </script>
