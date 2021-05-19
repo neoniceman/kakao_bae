@@ -70,9 +70,8 @@ export default defineComponent({
       currentSecond: 0,
       moleArray: [] as Mole[],
       pause: false,
+      level: 0,
     });
-
-    const timerArr: Array<Timer> = [];
 
     const levelArr: Array<Level> = [];
     let selectLevel: Level;
@@ -84,11 +83,13 @@ export default defineComponent({
       levelArr.push(level1);
     }
 
-    selectLevel = levelArr[0];
 
     state.colNumber = store.state.colNumber;
     state.rowNumber = store.state.rowNumber;
     state.moleNumber = store.state.moleNumber;
+    state.level = store.state.level;
+
+    selectLevel = levelArr[state.level];
 
     for (i = 0; i < state.colNumber * state.rowNumber; i++) {
       const mole = {} as Mole;
@@ -133,7 +134,6 @@ export default defineComponent({
 
           const timerShow: ReturnType<typeof setTimeout> = setTimeout(() => {
             if (idx > -1) {
-
               selectedItem.isUp = true;
 
               const timerHide: ReturnType<typeof setTimeout> = setTimeout(
@@ -149,16 +149,12 @@ export default defineComponent({
               let t2 = {} as Timer;
               t2.StartTime = new Date();
               t2.timerId = timerHide;
-              timerArr.push(t2);
             }
           }, time);
           let t1 = {} as Timer;
           t1.StartTime = new Date();
           t1.timerId = timerShow;
-          timerArr.push(t1);
         }
-
-        console.log(timerArr);
 
         const timerUpdate: ReturnType<typeof setTimeout> = setTimeout(() => {
           if (state.pause) {
@@ -246,7 +242,7 @@ export default defineComponent({
 
 export interface Mole {
   id: number; //  고유 인덱스값
-  isUp: boolean;  // 튀어나왔는지 여부
+  isUp: boolean; // 튀어나왔는지 여부
   ready: boolean; // 튀어 나올준비가 되었는지 여부
 }
 

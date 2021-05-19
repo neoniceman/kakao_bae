@@ -38,6 +38,14 @@
       :validShow="state.moleNumber.validShow"
       @callParents="moleNumberChange"
     />
+    <div>
+      <input type="radio" id="level1" value="0" v-model="state.level" />
+      <label for="one">초급</label>
+      <input type="radio" id="level2" value="1" v-model="state.level" />
+      <label for="two">중급</label>
+      <input type="radio" id="level3" value="2" v-model="state.level" />
+      <label for="two">고급</label>
+    </div>
     <my-button primary="true" label="시작" @click="onClick" />
   </div>
 </template>
@@ -85,6 +93,7 @@ export default defineComponent({
       },
       maxMoleCount: 2,
       maxMoleLength: 1,
+      level: 0,
     });
 
     const colNumberChange = (e: any) => {
@@ -126,6 +135,7 @@ export default defineComponent({
         state.colNumber.val = store.state.colNumber;
         state.rowNumber.val = store.state.rowNumber;
         state.moleNumber.val = store.state.moleNumber;
+        state.level = store.state.level;
       }
     });
 
@@ -149,12 +159,14 @@ export default defineComponent({
             colNumber: state.colNumber.val,
             rowNumber: state.rowNumber.val,
             moleNumber: state.moleNumber.val,
+            level: state.level,
           };
+
 
           // 네비게이션 전달 확인용
           store.commit("update", params);
           router.push({
-            name: "Stage"
+            name: "Stage",
           });
         }
       },
