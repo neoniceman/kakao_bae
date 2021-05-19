@@ -68,16 +68,16 @@ export default defineComponent({
       interval: 1000,
       maxSecond: 60,
       currentSecond: 0,
-      moleArray: [] as Mole[],
+      moleArray: [] as IMole[],
       pause: false,
       level: 0,
     });
 
-    const levelArr: Array<Level> = [];
-    let selectLevel: Level;
+    const levelArr: Array<ILevel> = [];
+    let selectLevel: ILevel;
 
     for (let i = 0; i < 3; i++) {
-      const level1 = {} as Level;
+      const level1 = {} as ILevel;
       level1.timeWaitMin = 1500 - i * 500;
       level1.timeWaitMax = 2500 - i * 500;
       levelArr.push(level1);
@@ -91,7 +91,7 @@ export default defineComponent({
     selectLevel = levelArr[state.level];
 
     for (let i = 0; i < state.colNumber * state.rowNumber; i++) {
-      const mole = {} as Mole;
+      const mole = {} as IMole;
       mole.id = i;
       mole.isUp = false;
       mole.ready = false;
@@ -121,21 +121,21 @@ export default defineComponent({
         );
 
         // 이미 튀어 나온갯수가 최대값을 넘었는지 확인한다.
-        const upTarget = state.moleArray.filter((item: Mole) => {
+        const upTarget = state.moleArray.filter((item: IMole) => {
           if (item.ready == true) {
             return true;
           }
         });
 
         if (upTarget.length < state.moleNumber) {
-          const target = state.moleArray.filter((item: Mole) => {
+          const target = state.moleArray.filter((item: IMole) => {
             if (item.ready == false) {
               return true;
             }
           });
 
           let idx = -1;
-          let selectedMole: Mole = {} as Mole;
+          let selectedMole: IMole = {} as IMole;
           if (target.length > 0) {
             idx = Math.floor(Math.random() * target.length);
 
@@ -159,7 +159,7 @@ export default defineComponent({
                 timeWait
               );
 
-              let t2 = {} as Timer;
+              let t2 = {} as ITimer;
               t2.startDate = new Date();
               t2.timerId = timerHide;
               t2.callBack = hideCallback;
@@ -170,7 +170,7 @@ export default defineComponent({
               time
             );
 
-            let t1 = {} as Timer;
+            let t1 = {} as ITimer;
             t1.startDate = new Date();
             t1.timerId = timerShow;
             t1.callBack = showCallback;
@@ -217,7 +217,7 @@ export default defineComponent({
     state.width = 200 * state.colNumber + "px";
     state.height = 200 * state.rowNumber + "px";
 
-    const onMoleClick = (e: Mole) => {
+    const onMoleClick = (e: IMole) => {
       if (!state.pause) {
         state.point++;
         state.moleArray[e.id].isUp = false;
@@ -233,7 +233,7 @@ export default defineComponent({
         update();
       }
 
-      const upTarget = state.moleArray.filter((item: Mole) => {
+      const upTarget = state.moleArray.filter((item: IMole) => {
         if (item.ready == true) {
           return true;
         }
@@ -304,21 +304,21 @@ export default defineComponent({
   },
 });
 
-export interface Mole {
+export interface IMole {
   id: number; //  고유 인덱스값
   isUp: boolean; // 튀어나왔는지 여부
   ready: boolean; // 튀어 나올준비가 되었는지 여부
-  showTimer: Timer;
-  hideTimer: Timer;
+  showTimer: ITimer;
+  hideTimer: ITimer;
 }
 
-export interface Level {
+export interface ILevel {
   timeWaitMin: number;
   timeWaitMax: number;
 }
 
 // TODO : ts 에서 타이머 커스터 모듈로 작성필요
-export interface Timer {
+export interface ITimer {
   timerId: number;
   startDate: Date;
   pauseDate: Date;
